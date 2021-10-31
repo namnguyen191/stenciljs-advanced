@@ -1,4 +1,4 @@
-import { Component, h, State, Element } from '@stencil/core';
+import { Component, h, State, Element, Prop } from '@stencil/core';
 import { API_KEY } from '../../global/global';
 
 @Component({
@@ -14,6 +14,35 @@ export class StockPriceComponent {
   @State() fetchedPrice: number;
   @State() stockUserInput: string;
   @State() stockInputValid = false;
+  @State() error: string;
+
+  @Prop() stockSymbol: string;
+
+  // run before render
+  // should not set any state here due inefficiency
+  componentWillLoad() {
+    console.log(`Nam data is: component will load`, this.stockSymbol);
+  }
+
+  componentDidLoad() {
+    console.log(`Nam data is: component did load`);
+    if (this.stockSymbol) {
+      this.fetStockPrice(this.stockSymbol);
+    }
+  }
+
+  componentWillUpdate() {
+    console.log(`Nam data is: component will update`);
+  }
+
+  componentDidUpdate() {
+    console.log(`Nam data is: component did update`);
+  }
+
+  // great place for any clean up
+  disconnectedCallback() {
+    console.log(`Nam data is: component did unload`);
+  }
 
   onUserInput(e: Event) {
     this.stockUserInput = (e.target as HTMLInputElement).value;
@@ -24,20 +53,41 @@ export class StockPriceComponent {
     }
   }
 
-  onFetchStockPrice(event: Event) {
-    event.preventDefault();
-    const stockSymbol = this.stockInp.value;
+  fetStockPrice(stockSymbol: string) {
     fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stockSymbol}&apikey=${API_KEY}`)
       .then(res => {
         return res.json();
       })
       .then(parsedRes => {
+        if (!parsedRes['Global Quote']['05. price']) {
+          throw new Error('Invalid symbol');
+        }
+
+        this.error = null;
         this.fetchedPrice = +parsedRes['Global Quote']['05. price'];
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        this.error = err.message;
+      });
+  }
+
+  onFetchStockPrice(event: Event) {
+    event.preventDefault();
+    const stockSymbol = this.stockInp.value;
+    this.fetStockPrice(stockSymbol);
   }
 
   render() {
+    let dataContent = <p>Please enter a symbol</p>;
+
+    if (this.error) {
+      dataContent = <p>{this.error}</p>;
+    }
+
+    if (this.fetchedPrice) {
+      dataContent = <p>Price: ${this.fetchedPrice}</p>;
+    }
+
     return [
       <form onSubmit={this.onFetchStockPrice.bind(this)}>
         <input id="stock-symbol" ref={el => (this.stockInp = el)} value={this.stockUserInput} onInput={this.onUserInput.bind(this)} />
@@ -45,9 +95,7 @@ export class StockPriceComponent {
           Fetch
         </button>
       </form>,
-      <div>
-        <p>Price: ${this.fetchedPrice}</p>
-      </div>,
+      <div>{dataContent}</div>,
     ];
   }
 }
