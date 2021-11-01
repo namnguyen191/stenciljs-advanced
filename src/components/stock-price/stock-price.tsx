@@ -1,4 +1,4 @@
-import { Component, h, State, Element, Prop, Watch } from '@stencil/core';
+import { Component, h, State, Element, Prop, Watch, Listen, Host } from '@stencil/core';
 import { API_KEY } from '../../global/global';
 
 @Component({
@@ -16,6 +16,7 @@ export class StockPriceComponent {
   @State() stockUserInput: string;
   @State() stockInputValid = false;
   @State() error: string;
+  @State() loading: boolean = false;
 
   @Prop({ mutable: true, reflect: true }) stockSymbol: string;
 
@@ -23,6 +24,7 @@ export class StockPriceComponent {
   stockSymbolChanged(newValue: string, oldValue: string) {
     if (newValue !== oldValue) {
       this.stockUserInput = newValue;
+      this.stockInputValid = true;
       this.fetStockPrice(newValue);
     }
   }
@@ -66,6 +68,13 @@ export class StockPriceComponent {
     console.log(`Nam data is: component did unload`);
   }
 
+  @Listen('nnSymbolSelected', { target: 'body' })
+  onStockSymbolSelected(e: CustomEvent<string>) {
+    if (e.detail && e.detail.trim() !== this.stockSymbol) {
+      this.stockSymbol = e.detail;
+    }
+  }
+
   onUserInput(e: Event) {
     this.stockUserInput = (e.target as HTMLInputElement).value;
     if (this.stockUserInput.trim() !== '') {
@@ -76,6 +85,7 @@ export class StockPriceComponent {
   }
 
   fetStockPrice(stockSymbol: string) {
+    this.loading = true;
     fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stockSymbol}&apikey=${API_KEY}`)
       .then(res => {
         return res.json();
@@ -87,9 +97,12 @@ export class StockPriceComponent {
 
         this.error = null;
         this.fetchedPrice = +parsedRes['Global Quote']['05. price'];
+        this.loading = false;
       })
       .catch(err => {
         this.error = err.message;
+        this.fetchedPrice = null;
+        this.loading = false;
       });
   }
 
@@ -110,14 +123,22 @@ export class StockPriceComponent {
       dataContent = <p>Price: ${this.fetchedPrice}</p>;
     }
 
-    return [
-      <form onSubmit={this.onFetchStockPrice.bind(this)}>
-        <input id="stock-symbol" ref={el => (this.stockInp = el)} value={this.stockUserInput} onInput={this.onUserInput.bind(this)} />
-        <button type="submit" disabled={!this.stockInputValid}>
-          Fetch
-        </button>
-      </form>,
-      <div>{dataContent}</div>,
-    ];
+    if (this.loading) {
+      dataContent = (
+        <nn-spinner></nn-spinner>
+      );
+    }
+
+    return (
+      <Host class={{ 'error': !!this.error }}>
+        <form onSubmit={this.onFetchStockPrice.bind(this)}>
+          <input id="stock-symbol" ref={el => (this.stockInp = el)} value={this.stockUserInput} onInput={this.onUserInput.bind(this)} />
+          <button type="submit" disabled={!this.stockInputValid || this.loading}>
+            Fetch
+          </button>
+        </form>
+        <div>{dataContent}</div>
+      </Host>
+    );
   }
 }

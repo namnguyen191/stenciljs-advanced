@@ -6,9 +6,24 @@
     <title>Stencil Component Starter</title>
 
     <script type="module" src="/build/advance.esm.js"></script>
+
+    <style>
+      :root {
+        --color-primary: hsl(120, 83%, 50%);
+        --color-primary-inverse: hsl(120, 83%, 20%);
+      }
+    </style>
   </head>
   <body>
     <nn-stock-finder></nn-stock-finder>
+
     <nn-stock-price stock-symbol="aapl" />
+
+    <!-- <script>
+      const stockFinderEl = document.querySelector('nn-stock-finder');
+      stockFinderEl.addEventListener('nnSymbolSelected', (e) => {
+        console.log(e);
+      })
+    </script> -->
   </body>
 </html>

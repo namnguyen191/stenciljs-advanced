@@ -6,6 +6,8 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 export namespace Components {
+    interface NnSpinner {
+    }
     interface NnStockFinder {
     }
     interface NnStockPrice {
@@ -13,6 +15,12 @@ export namespace Components {
     }
 }
 declare global {
+    interface HTMLNnSpinnerElement extends Components.NnSpinner, HTMLStencilElement {
+    }
+    var HTMLNnSpinnerElement: {
+        prototype: HTMLNnSpinnerElement;
+        new (): HTMLNnSpinnerElement;
+    };
     interface HTMLNnStockFinderElement extends Components.NnStockFinder, HTMLStencilElement {
     }
     var HTMLNnStockFinderElement: {
@@ -26,17 +34,22 @@ declare global {
         new (): HTMLNnStockPriceElement;
     };
     interface HTMLElementTagNameMap {
+        "nn-spinner": HTMLNnSpinnerElement;
         "nn-stock-finder": HTMLNnStockFinderElement;
         "nn-stock-price": HTMLNnStockPriceElement;
     }
 }
 declare namespace LocalJSX {
+    interface NnSpinner {
+    }
     interface NnStockFinder {
+        "onNnSymbolSelected"?: (event: CustomEvent<string>) => void;
     }
     interface NnStockPrice {
         "stockSymbol"?: string;
     }
     interface IntrinsicElements {
+        "nn-spinner": NnSpinner;
         "nn-stock-finder": NnStockFinder;
         "nn-stock-price": NnStockPrice;
     }
@@ -45,6 +58,7 @@ export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
+            "nn-spinner": LocalJSX.NnSpinner & JSXBase.HTMLAttributes<HTMLNnSpinnerElement>;
             "nn-stock-finder": LocalJSX.NnStockFinder & JSXBase.HTMLAttributes<HTMLNnStockFinderElement>;
             "nn-stock-price": LocalJSX.NnStockPrice & JSXBase.HTMLAttributes<HTMLNnStockPriceElement>;
         }

@@ -1,6 +1,6 @@
 :host {
   font-family: sans-serif;
-  border: 2px solid hsl(300, 97%, 12%);
+  border: 2px solid var(--color-primary, hsl(300, 97%, 12%));
   margin: 2rem;
   padding: 1rem;
   display: block;
@@ -8,9 +8,13 @@
   max-width: 100%;
 }
 
+:host(.error) {
+  border-color: red;
+}
+
 form input {
   font: inherit;
-  color: hsl(300, 97%, 12%);
+  color: var(--color-primary, hsl(300, 97%, 12%));
   padding: 0.1rem 0.25rem;
   margin-bottom: 0.5rem;
 }
@@ -23,16 +27,16 @@ form button:focus {
 form button {
   font: inherit;
   padding: 0.25rem 0.5rem;
-  border: 1px solid hsl(300, 97%, 12%);
-  background: hsl(300, 97%, 12%);
+  border: 1px solid var(--color-primary, hsl(300, 97%, 12%));
+  background: var(--color-primary, hsl(300, 97%, 12%));
   color: white;
   display: block;
 }
 
 form button:hover,
 form button:active {
-  background: hsl(300, 97%, 30%);
-  border-color: hsl(300, 97%, 30%);
+  background: var(--color-primary-inverse, hsl(300, 97%, 30%));
+  border-color: var(--color-primary-inverse, hsl(300, 97%, 30%));
 }
 
 form button:disabled {
