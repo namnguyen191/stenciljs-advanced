@@ -1,4 +1,4 @@
-import { Component, h, State, Element, Prop } from '@stencil/core';
+import { Component, h, State, Element, Prop, Watch } from '@stencil/core';
 import { API_KEY } from '../../global/global';
 
 @Component({
@@ -10,23 +10,41 @@ export class StockPriceComponent {
   @Element() el: HTMLElement;
 
   stockInp: HTMLInputElement;
+  // initialStockSymbol: string;
 
   @State() fetchedPrice: number;
   @State() stockUserInput: string;
   @State() stockInputValid = false;
   @State() error: string;
 
-  @Prop() stockSymbol: string;
+  @Prop({ mutable: true, reflect: true }) stockSymbol: string;
+
+  @Watch('stockSymbol')
+  stockSymbolChanged(newValue: string, oldValue: string) {
+    if (newValue !== oldValue) {
+      this.stockUserInput = newValue;
+      this.fetStockPrice(newValue);
+    }
+  }
 
   // run before render
   // should not set any state here due inefficiency
   componentWillLoad() {
     console.log(`Nam data is: component will load`, this.stockSymbol);
+    if (this.stockSymbol) {
+      // this.initialStockSymbol = this.stockSymbol;
+      this.stockUserInput = this.stockSymbol;
+      this.stockInputValid = true;
+      // this.fetStockPrice(this.stockSymbol);
+    }
   }
 
   componentDidLoad() {
     console.log(`Nam data is: component did load`);
     if (this.stockSymbol) {
+      // this.initialStockSymbol = this.stockSymbol;
+      // this.stockUserInput = this.stockSymbol;
+      // this.stockInputValid = true;
       this.fetStockPrice(this.stockSymbol);
     }
   }
@@ -37,6 +55,10 @@ export class StockPriceComponent {
 
   componentDidUpdate() {
     console.log(`Nam data is: component did update`);
+    // if (this.stockSymbol != this.initialStockSymbol) {
+    //   this.initialStockSymbol = this.stockSymbol;
+    //   this.fetStockPrice(this.stockSymbol);
+    // }
   }
 
   // great place for any clean up
@@ -73,8 +95,8 @@ export class StockPriceComponent {
 
   onFetchStockPrice(event: Event) {
     event.preventDefault();
-    const stockSymbol = this.stockInp.value;
-    this.fetStockPrice(stockSymbol);
+    this.stockSymbol = this.stockInp.value;
+    // this.fetStockPrice(stockSymbol);
   }
 
   render() {
